@@ -13,7 +13,7 @@
   <header class="border-b border-slate-800 bg-slate-950">
     <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
       
-      <!-- Logo Button (Consistent White Text) -->
+      <!-- Logo Button (Always White Text) -->
       <button onclick="switchMainTab('home')" class="text-left focus:outline-none group">
         <h1 class="text-xl font-bold text-slate-100 group-hover:text-red-400 transition-colors">
           cudGD <span id="header-subtitle" class="text-slate-400 font-normal text-sm transition-colors">Home</span>
@@ -69,7 +69,6 @@
         </p>
 
         <div class="p-3 bg-slate-900 border border-slate-800/80 rounded text-xs text-slate-500 italic mt-4">
-          <!-- WRITE YOUR HOME PAGE HTML HERE LATER -->
           [Home page placeholder — you can replace this content inside the 'view-home' section in index.html later]
         </div>
       </div>
@@ -156,9 +155,9 @@
 
     // 1. DATA
     const players = [
-      { id: 1, username: "cincb" },
-      { id: 2, username: "после утра" },
-      { id: 3, username: "Marxism" }
+      { id: 1, username: "Putter" },
+      { id: 2, username: "Noon" },
+      { id: 3, username: "Max" }
     ];
 
     const levels = [];
@@ -241,7 +240,6 @@
           .filter(Boolean);
 
         const card = document.createElement('div');
-        // Restored clear border outlines
         card.className = "bg-slate-950 border border-slate-800 rounded p-3 flex flex-col gap-2 hover:border-slate-700 transition";
         
         let adminHtml = '';
