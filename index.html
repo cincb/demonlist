@@ -114,4 +114,237 @@
   <!-- JAVASCRIPT LOGIC -->
   <script>
     let currentTier = 4;
-    let
+    let isAdminMode = false;
+
+    // 1. DATA (In-Memory State)
+    const players = [
+      { id: 1, username: "Putter" },
+      { id: 2, username: "Noon" },
+      { id: 3, username: "Max" }
+    ];
+
+    const levels = [
+      { id: 1, name: "Necropolis", creator: "Darnoc", tier: 3, placement: 8 },
+      { id: 2, name: "Just DANCE", creator: "Ggb0y", tier: 4, placement: 20 },
+      { id: 3, name: "ILOVECYAN", creator: "KrmaL", tier: 4, placement: 21 }
+    ];
+
+    let completions = [
+      { player_id: 1, level_id: 1 },
+      { player_id: 1, level_id: 2 },
+      { player_id: 2, level_id: 2 },
+      { player_id: 3, level_id: 3 }
+    ];
+
+    const tierPointWeights = { 1: 1, 2: 2.5, 3: 5, 4: 10 };
+
+    function getPoints(level) {
+      const weight = tierPointWeights[level.tier] || 1;
+      const basePoints = 100 * Math.pow((101 - level.placement) / 100, 1.5);
+      return +(basePoints * (weight / 10)).toFixed(2);
+    }
+
+    // Toggle Admin Panel
+    function toggleAdminPanel() {
+      isAdminMode = !isAdminMode;
+      document.getElementById('admin-bar').classList.toggle('hidden', !isAdminMode);
+      renderLevels();
+    }
+
+    // Toggle a completion for a player live
+    function togglePlayerCompletion(playerId, levelId) {
+      const existingIndex = completions.findIndex(c => c.player_id === playerId && c.level_id === levelId);
+      if (existingIndex > -1) {
+        completions.splice(existingIndex, 1);
+      } else {
+        completions.push({ player_id: playerId, level_id: levelId });
+      }
+      renderLevels();
+      renderLeaderboard();
+    }
+
+    // Render Levels
+    function renderLevels() {
+      const container = document.getElementById('levels-container');
+      container.innerHTML = '';
+      
+      const filteredLevels = levels
+        .filter(l => l.tier === currentTier)
+        .sort((a, b) => a.placement - b.placement);
+
+      document.getElementById('current-tier-title').textContent = `Classic Tier ${currentTier}`;
+      document.getElementById('level-count').textContent = `${filteredLevels.length} Levels`;
+
+      if (filteredLevels.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 italic py-4">No levels added to Tier ${currentTier} yet.</p>`;
+        return;
+      }
+
+      filteredLevels.forEach(level => {
+        const points = getPoints(level);
+        const conquerors = completions
+          .filter(c => c.level_id === level.id)
+          .map(c => players.find(p => p.id === c.player_id)?.username)
+          .filter(Boolean);
+
+        const card = document.createElement('div');
+        card.className = "bg-slate-950 border border-slate-800 rounded p-3 flex flex-col gap-2";
+        
+        let adminHtml = '';
+        if (isAdminMode) {
+          adminHtml = `
+            <div class="border-t border-slate-800/80 pt-2 flex items-center gap-3 text-xs text-slate-400">
+              <span class="font-bold text-orange-400">Victor Check:</span>
+              ${players.map(p => {
+                const isBeaten = completions.some(c => c.player_id === p.id && c.level_id === level.id);
+                return `
+                  <label class="flex items-center gap-1 cursor-pointer hover:text-slate-200">
+                    <input type="checkbox" ${isBeaten ? 'checked' : ''} onchange="togglePlayerCompletion(${p.id},${level.id})" class="accent-orange-500 rounded">
+                    ${p.username}
+                  </label>
+                `;
+              }).join('')}
+            </div>
+          `;
+        }
+
+        card.innerHTML = `
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-3">
+              <span class="text-base font-bold text-orange-400 font-mono">#${level.placement}</span>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="font-bold text-slate-100">${level.name}</h3>
+                  <span class="text-xs bg-slate-800 text-orange-300 px-1.5 py-0.5 rounded">Tier ${level.tier}</span>
+                </div>
+                <p class="text-xs text-slate-400">by ${level.creator}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-300 font-mono block">${points} pts</span>
+              <span class="text-xs text-slate-500">${conquerors.length} Victor(s)</span>
+            </div>
+          </div>
+          ${adminHtml}
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function selectTier(tierNumber) {
+      currentTier = tierNumber;
+      [1, 2, 3, 4].forEach(t => {
+        const btn = document.getElementById(`tier-btn-${t}`);
+        if (t === tierNumber) {
+          btn.className = "px-3 py-1 bg-orange-600 text-white rounded text-xs font-semibold";
+        } else {
+          btn.className = "px-3 py-1 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700";
+        }
+      });
+      renderLevels();
+    }
+
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboard-container');
+      container.innerHTML = '';
+
+      const leaderboardData = players.map(player => {
+        const playerCompletions = completions.filter(c => c.player_id === player.id);
+        const playerLevels = playerCompletions
+          .map(c => levels.find(l => l.id === c.level_id))
+          .filter(Boolean)
+          .sort((a, b) => {
+            if (b.tier !== a.tier) return b.tier - a.tier;
+            return a.placement - b.placement;
+          });
+
+        const totalPoints = playerLevels.reduce((sum, l) => sum + getPoints(l), 0);
+        const hardestDemon = playerLevels.length > 0 
+          ? `${playerLevels[0].name} (Tier ${playerLevels[0].tier} #${playerLevels[0].placement})` 
+          : "None";
+
+        return {
+          ...player,
+          totalPoints: +totalPoints.toFixed(2),
+          demonsBeaten: playerLevels.length,
+          hardestDemon,
+          completedLevels: playerLevels
+        };
+      }).sort((a, b) => b.totalPoints - a.totalPoints);
+
+      leaderboardData.forEach((player, index) => {
+        const rank = index + 1;
+        const card = document.createElement('div');
+        card.className = "bg-slate-950 border border-slate-800 rounded p-3 flex justify-between items-center cursor-pointer hover:bg-slate-800/50";
+        card.onclick = () => openPlayerModal(player, rank);
+        
+        card.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="font-bold text-sm ${rank === 1 ? 'text-amber-400' : 'text-slate-400'}">#${rank}</span>
+            <div>
+              <h4 class="font-bold text-slate-100">${player.username}</h4>
+              <p class="text-xs text-slate-400">${player.demonsBeaten} Demons Beaten</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="font-mono font-bold text-orange-400">${player.totalPoints}</span>
+            <span class="text-xs text-slate-500 block">PTS</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function switchMainTab(tab) {
+      const levelsView = document.getElementById('view-levels');
+      const leaderboardView = document.getElementById('view-leaderboard');
+      const btnLevels = document.getElementById('btn-levels');
+      const btnLeaderboard = document.getElementById('btn-leaderboard');
+
+      if (tab === 'levels') {
+        levelsView.classList.remove('hidden');
+        leaderboardView.classList.add('hidden');
+        btnLevels.className = "px-4 py-1.5 bg-orange-600 text-white rounded font-medium text-sm";
+        btnLeaderboard.className = "px-4 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-sm hover:bg-slate-700";
+      } else {
+        levelsView.classList.add('hidden');
+        leaderboardView.classList.remove('hidden');
+        btnLeaderboard.className = "px-4 py-1.5 bg-orange-600 text-white rounded font-medium text-sm";
+        btnLevels.className = "px-4 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-sm hover:bg-slate-700";
+      }
+    }
+
+    function openPlayerModal(player, rank) {
+      document.getElementById('modal-username').textContent = player.username;
+      document.getElementById('modal-stats').textContent = `Rank #${rank} • ${player.totalPoints} Points`;
+      document.getElementById('modal-hardest').textContent = player.hardestDemon;
+
+      const listContainer = document.getElementById('modal-completions');
+      listContainer.innerHTML = '';
+
+      if (player.completedLevels.length === 0) {
+        listContainer.innerHTML = `<p class="text-xs text-slate-500 italic">No beaten demons recorded yet.</p>`;
+      } else {
+        player.completedLevels.forEach(lvl => {
+          const item = document.createElement('div');
+          item.className = "bg-slate-950 p-2 rounded flex justify-between items-center text-xs border border-slate-800";
+          item.innerHTML = `
+            <span class="font-semibold text-slate-200">Tier ${lvl.tier} #${lvl.placement} - ${lvl.name}</span>
+            <span class="text-slate-400 font-mono">${getPoints(lvl)} pts</span>
+          `;
+          listContainer.appendChild(item);
+        });
+      }
+
+      document.getElementById('player-modal').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('player-modal').classList.add('hidden');
+    }
+
+    renderLevels();
+    renderLeaderboard();
+  </script>
+</body>
+</html>
