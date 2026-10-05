@@ -6,55 +6,90 @@
   <title>cudGD Demonlist</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            brand: {
-              500: '#f97316', // Orange primary
-              600: '#ea580c', // Darker orange hover
-            }
-          }
-        }
-      }
-    }
-  </script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-12">
 
   <!-- Header Section -->
   <header class="border-b border-slate-800 bg-slate-950">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold text-slate-100">cudGD <span class="text-orange-500 font-normal text-sm">Demonlist</span></h1>
+    <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
       
-      <!-- Navigation Buttons & Admin Toggle -->
-      <div class="flex items-center gap-3">
-        <nav class="flex gap-2">
-          <button id="btn-levels" onclick="switchMainTab('levels')" class="px-4 py-1.5 bg-orange-600 text-white rounded font-medium text-sm">Demons</button>
-          <button id="btn-leaderboard" onclick="switchMainTab('leaderboard')" class="px-4 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-sm hover:bg-slate-700">Leaderboard</button>
+      <!-- Logo Button (Clicking returns to Home Page) -->
+      <button onclick="switchMainTab('home')" class="text-left focus:outline-none group">
+        <h1 class="text-xl font-bold text-slate-100 group-hover:text-orange-400 transition-colors">
+          cudGD <span id="header-subtitle" class="text-slate-400 font-normal text-sm transition-colors">Home</span>
+        </h1>
+      </button>
+      
+      <!-- Navigation Tabs & Admin Toggle -->
+      <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+        <nav class="flex gap-1.5 min-w-max">
+          <!-- 1. Changelog (Grayscale) -->
+          <button id="btn-changelog" onclick="switchMainTab('changelog')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Changelog</button>
+          
+          <!-- 2. Demonlist (Orange) -->
+          <button id="btn-demonlist" onclick="switchMainTab('demonlist')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Demonlist</button>
+          
+          <!-- 3. Pemonlist (Green) -->
+          <button id="btn-pemonlist" onclick="switchMainTab('pemonlist')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Pemonlist</button>
+          
+          <!-- 4. Packs (Blue) -->
+          <button id="btn-packs" onclick="switchMainTab('packs')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Packs</button>
+          
+          <!-- 5. Leaderboard -->
+          <button id="btn-leaderboard" onclick="switchMainTab('leaderboard')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Leaderboard</button>
         </nav>
-        <button onclick="toggleAdminPanel()" class="px-3 py-1.5 bg-slate-800 text-orange-400 border border-orange-500/30 rounded font-medium text-xs hover:bg-slate-700">⚙️ Admin</button>
+
+        <button onclick="toggleAdminPanel()" class="px-2.5 py-1.5 bg-slate-800 text-orange-400 border border-orange-500/30 rounded font-medium text-xs hover:bg-slate-700 ml-1 whitespace-nowrap">⚙️ Admin</button>
       </div>
     </div>
   </header>
 
-  <!-- ADMIN EDIT BAR (Hidden by default) -->
+  <!-- ADMIN EDIT BAR -->
   <div id="admin-bar" class="bg-orange-950/40 border-b border-orange-500/30 py-3 px-4 hidden">
-    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
+    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
       <div class="flex items-center gap-2">
         <span class="text-xs font-bold uppercase text-orange-400 tracking-wider">Admin Mode Active:</span>
-        <span class="text-xs text-slate-300">Tap checkboxes on level cards to instantly toggle completions.</span>
+        <span class="text-xs text-slate-300">Tap checkboxes on level cards to toggle completions.</span>
       </div>
       <button onclick="toggleAdminPanel()" class="text-xs text-orange-400 hover:text-white underline">Exit Admin Mode</button>
     </div>
   </div>
 
-  <main class="max-w-4xl mx-auto px-4 mt-6">
+  <main class="max-w-5xl mx-auto px-4 mt-6">
 
-    <!-- LEVELS VIEW -->
-    <section id="view-levels" class="space-y-4">
+    <!-- ================================================================= -->
+    <!-- 0. HOME PAGE (DEFAULT START PAGE) -->
+    <!-- WRITE YOUR CUSTOM HOME PAGE CONTENT INSIDE THIS SECTION BELOW -->
+    <!-- ================================================================= -->
+    <section id="view-home" class="space-y-4">
+      <div class="bg-slate-950 border border-slate-800 rounded-lg p-6 space-y-3">
+        <h2 class="text-2xl font-bold text-slate-100">Welcome to cudGD</h2>
+        <p class="text-slate-400 text-sm leading-relaxed">
+          yoooooooo gd players of th hiiiiiiii
+        </p>
+
+        <!-- Placeholder notice -->
+        <div class="p-3 bg-slate-900 border border-slate-800/80 rounded text-xs text-slate-500 italic mt-4">
+          <!-- WRITE YOUR HOME PAGE HTML HERE LATER -->
+          [Home page placeholder — you can replace this content inside the 'view-home' section in index.html later]
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. CHANGELOG VIEW (Grayscale Theme) -->
+    <section id="view-changelog" class="hidden space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h2 class="text-lg font-bold text-slate-300">Changelog</h2>
+        <span class="text-xs text-slate-500 font-mono">Updates & Placement History</span>
+      </div>
       
+      <div class="bg-slate-950 border border-slate-800 rounded p-6 text-center">
+        <p class="text-xs text-slate-500 italic">No changelog entries recorded yet.</p>
+      </div>
+    </section>
+
+    <!-- 2. DEMONLIST VIEW (Orange Theme) -->
+    <section id="view-demonlist" class="hidden space-y-4">
       <!-- Tier Filter Tabs -->
       <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800">
         <span class="text-xs text-slate-400 font-bold uppercase tracking-wider mr-2">Tiers:</span>
@@ -73,7 +108,29 @@
       <div id="levels-container" class="space-y-2"></div>
     </section>
 
-    <!-- LEADERBOARD VIEW -->
+    <!-- 3. PEMONLIST VIEW (Green Theme) -->
+    <section id="view-pemonlist" class="hidden space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h2 class="text-lg font-bold text-emerald-400">Pemonlist</h2>
+        <span class="text-xs text-emerald-500/80 font-mono">Platformer Demons</span>
+      </div>
+      <div class="bg-slate-950 border border-slate-800 rounded p-6 text-center">
+        <p class="text-xs text-slate-500 italic">No platformer demons added yet.</p>
+      </div>
+    </section>
+
+    <!-- 4. PACKS VIEW (Blue Theme) -->
+    <section id="view-packs" class="hidden space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+        <h2 class="text-lg font-bold text-sky-400">Map Packs & Sets</h2>
+        <span class="text-xs text-sky-500/80 font-mono">Level Bundles</span>
+      </div>
+      <div class="bg-slate-950 border border-slate-800 rounded p-6 text-center">
+        <p class="text-xs text-slate-500 italic">No level packs configured yet.</p>
+      </div>
+    </section>
+
+    <!-- 5. LEADERBOARD VIEW -->
     <section id="view-leaderboard" class="hidden space-y-3">
       <div class="flex justify-between items-center mb-4">
         <h2 class="text-lg font-bold text-slate-200">Player Leaderboard</h2>
@@ -116,42 +173,49 @@
     let currentTier = 4;
     let isAdminMode = false;
 
-    // 1. DATA (In-Memory State)
+    // 1. DATA
     const players = [
-      { id: 1, username: "Putter" },
-      { id: 2, username: "Noon" },
-      { id: 3, username: "Max" }
+      { id: 1, username: "cincb" },
+      { id: 2, username: "после утра" },
+      { id: 3, username: "Marxism" }
     ];
 
-    const levels = [
-      { id: 1, name: "Necropolis", creator: "Darnoc", tier: 3, placement: 8 },
-      { id: 2, name: "Just DANCE", creator: "Ggb0y", tier: 4, placement: 20 },
-      { id: 3, name: "ILOVECYAN", creator: "KrmaL", tier: 4, placement: 21 }
-    ];
-
-    let completions = [
-      { player_id: 1, level_id: 1 },
-      { player_id: 1, level_id: 2 },
-      { player_id: 2, level_id: 2 },
-      { player_id: 3, level_id: 3 }
-    ];
-
-    const tierPointWeights = { 1: 1, 2: 2.5, 3: 5, 4: 10 };
-
+    const levels = [];
+    let completions = [];
+    
     function getPoints(level) {
-      const weight = tierPointWeights[level.tier] || 1;
-      const basePoints = 100 * Math.pow((101 - level.placement) / 100, 1.5);
-      return +(basePoints * (weight / 10)).toFixed(2);
+      // Define point boundaries for each tier: { max, min }
+      const tierRanges = {
+        4: { max: 1000, min: 800 },
+        3: { max: 800, min: 500 },
+        2: { max: 500, min: 250 },
+        1: { max: 250, min: 100 }
+      };
+    
+      const range = tierRanges[level.tier] || { max: 100, min: 0 };
+    
+      // Count total levels currently in this level's tier
+      const totalLevelsInTier = levels.filter(l => l.tier === level.tier).length;
+    
+      // If there's only 1 level in the tier, return maximum tier points
+      if (totalLevelsInTier <= 1) {
+        return range.max.toFixed(1);
+      }
+    
+      // Linear step calculation: - (Max - Min) / (Count - 1)
+      const step = (range.max - range.min) / (totalLevelsInTier - 1);
+      const calculatedPoints = range.max - ((level.placement - 1) * step);
+    
+      // Round to 1 decimal place (matches your ROUND(..., 1) formula)
+      return calculatedPoints.toFixed(1);
     }
 
-    // Toggle Admin Panel
     function toggleAdminPanel() {
       isAdminMode = !isAdminMode;
       document.getElementById('admin-bar').classList.toggle('hidden', !isAdminMode);
       renderLevels();
     }
 
-    // Toggle a completion for a player live
     function togglePlayerCompletion(playerId, levelId) {
       const existingIndex = completions.findIndex(c => c.player_id === playerId && c.level_id === levelId);
       if (existingIndex > -1) {
@@ -163,7 +227,6 @@
       renderLeaderboard();
     }
 
-    // Render Levels
     function renderLevels() {
       const container = document.getElementById('levels-container');
       container.innerHTML = '';
@@ -176,7 +239,7 @@
       document.getElementById('level-count').textContent = `${filteredLevels.length} Levels`;
 
       if (filteredLevels.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 italic py-4">No levels added to Tier ${currentTier} yet.</p>`;
+        container.innerHTML = `<p class="text-xs text-slate-500 italic py-6 text-center border border-slate-800/60 rounded bg-slate-950">No levels added to Tier ${currentTier} yet.</p>`;
         return;
       }
 
@@ -295,22 +358,47 @@
       });
     }
 
+    // MAIN NAVIGATION SWITCHER WITH THEME COLORS & HOME DEFAULT
     function switchMainTab(tab) {
-      const levelsView = document.getElementById('view-levels');
-      const leaderboardView = document.getElementById('view-leaderboard');
-      const btnLevels = document.getElementById('btn-levels');
-      const btnLeaderboard = document.getElementById('btn-leaderboard');
+      const views = ['home', 'changelog', 'demonlist', 'pemonlist', 'packs', 'leaderboard'];
+      
+      // Hide all views & reset button styles
+      views.forEach(v => {
+        document.getElementById(`view-${v}`).classList.add('hidden');
+        const btn = document.getElementById(`btn-${v}`);
+        if (btn) {
+          btn.className = "px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition";
+        }
+      });
 
-      if (tab === 'levels') {
-        levelsView.classList.remove('hidden');
-        leaderboardView.classList.add('hidden');
-        btnLevels.className = "px-4 py-1.5 bg-orange-600 text-white rounded font-medium text-sm";
-        btnLeaderboard.className = "px-4 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-sm hover:bg-slate-700";
-      } else {
-        levelsView.classList.add('hidden');
-        leaderboardView.classList.remove('hidden');
-        btnLeaderboard.className = "px-4 py-1.5 bg-orange-600 text-white rounded font-medium text-sm";
-        btnLevels.className = "px-4 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-sm hover:bg-slate-700";
+      // Show selected view
+      document.getElementById(`view-${tab}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`btn-${tab}`);
+      const subtitle = document.getElementById('header-subtitle');
+
+      if (tab === 'home') {
+        subtitle.textContent = "Home";
+        subtitle.className = "text-slate-400 font-normal text-sm transition-colors";
+      } else if (tab === 'changelog') {
+        if (activeBtn) activeBtn.className = "px-3 py-1.5 bg-slate-200 text-slate-900 rounded font-medium text-xs transition";
+        subtitle.textContent = "Changelog";
+        subtitle.className = "text-slate-400 font-normal text-sm transition-colors";
+      } else if (tab === 'demonlist') {
+        if (activeBtn) activeBtn.className = "px-3 py-1.5 bg-orange-600 text-white rounded font-medium text-xs transition";
+        subtitle.textContent = "Demonlist";
+        subtitle.className = "text-orange-500 font-normal text-sm transition-colors";
+      } else if (tab === 'pemonlist') {
+        if (activeBtn) activeBtn.className = "px-3 py-1.5 bg-emerald-600 text-white rounded font-medium text-xs transition";
+        subtitle.textContent = "Pemonlist";
+        subtitle.className = "text-emerald-400 font-normal text-sm transition-colors";
+      } else if (tab === 'packs') {
+        if (activeBtn) activeBtn.className = "px-3 py-1.5 bg-sky-600 text-white rounded font-medium text-xs transition";
+        subtitle.textContent = "Packs";
+        subtitle.className = "text-sky-400 font-normal text-sm transition-colors";
+      } else if (tab === 'leaderboard') {
+        if (activeBtn) activeBtn.className = "px-3 py-1.5 bg-indigo-600 text-white rounded font-medium text-xs transition";
+        subtitle.textContent = "Leaderboard";
+        subtitle.className = "text-indigo-400 font-normal text-sm transition-colors";
       }
     }
 
@@ -343,6 +431,8 @@
       document.getElementById('player-modal').classList.add('hidden');
     }
 
+    // Initial Load (Defaults to Home tab)
+    switchMainTab('home');
     renderLevels();
     renderLeaderboard();
   </script>
