@@ -6,6 +6,8 @@
   <title>cudGD Demonlist</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-sdk@2"></script>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-12">
 
@@ -23,26 +25,15 @@
       <!-- Navigation Tabs & Admin Toggle -->
       <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
         <nav class="flex gap-1.5 min-w-max">
-          <!-- 1. Changelog -->
           <button id="btn-changelog" onclick="switchMainTab('changelog')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Changelog</button>
-          
-          <!-- 2. Demonlist -->
           <button id="btn-demonlist" onclick="switchMainTab('demonlist')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Demonlist</button>
-          
-          <!-- 3. Pemonlist -->
           <button id="btn-pemonlist" onclick="switchMainTab('pemonlist')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Pemonlist</button>
-
-          <!-- 4. Specials -->
           <button id="btn-specials" onclick="switchMainTab('specials')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Specials</button>
-          
-          <!-- 5. Packs -->
           <button id="btn-packs" onclick="switchMainTab('packs')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Packs</button>
-          
-          <!-- 6. Leaderboard -->
           <button id="btn-leaderboard" onclick="switchMainTab('leaderboard')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Leaderboard</button>
         </nav>
 
-        <button onclick="toggleAdminPanel()" class="px-2.5 py-1.5 bg-slate-800 text-red-400 border border-red-500/30 rounded font-medium text-xs hover:bg-slate-700 ml-1 whitespace-nowrap">⚙️️ Admin</button>
+        <button onclick="toggleAdminPanel()" class="px-2.5 py-1.5 bg-slate-800 text-red-400 border border-red-500/30 rounded font-medium text-xs hover:bg-slate-700 ml-1 whitespace-nowrap">⚙ Admin</button>
       </div>
     </div>
   </header>
@@ -64,9 +55,7 @@
     <section id="view-home" class="space-y-4">
       <div class="bg-slate-950 border border-slate-800 rounded-lg p-6 space-y-3">
         <h2 class="text-2xl font-bold text-slate-100">Welcome to cudGD</h2>
-        <p class="text-slate-400 text-sm leading-relaxed">
-          welcome my homies
-        </p>
+        <p class="text-slate-400 text-sm leading-relaxed">welcome my homies</p>
 
         <div class="p-3 bg-slate-900 border border-slate-800/80 rounded text-xs text-slate-500 italic mt-4">
           this will be your home now and the sheets will be deprecated gng expect this to be done by next month
@@ -80,15 +69,13 @@
         <h2 class="text-lg font-bold text-slate-300">Changelog</h2>
         <span class="text-xs text-slate-500 font-mono">Updates & Placement History</span>
       </div>
-      
       <div class="bg-slate-950 border border-slate-800 rounded p-6 text-center">
         <p class="text-xs text-slate-500 italic">No changelog entries recorded yet.</p>
       </div>
     </section>
 
-    <!-- LEVEL LIST CONTAINER (DEMONLIST, PEMONLIST, SPECIALS, PACKS) -->
+    <!-- LEVEL LIST CONTAINER -->
     <section id="view-list-container" class="hidden space-y-4">
-      <!-- Header Controls & Tier Tabs -->
       <div class="bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
           <div>
@@ -107,7 +94,6 @@
         </div>
       </div>
       
-      <!-- Levels Grid Container -->
       <div id="levels-container" class="space-y-2.5"></div>
     </section>
 
@@ -123,7 +109,6 @@
         </div>
       </div>
 
-      <!-- Leaderboard Header Bar -->
       <div class="hidden sm:grid grid-cols-12 px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
         <span class="col-span-1">Rank</span>
         <span class="col-span-6">Player</span>
@@ -162,9 +147,20 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
+    // ----------------------------------------------------
+    // SUPABASE SETUP
+    // ----------------------------------------------------
+    const SUPABASE_URL = 'https://sugqnerwwrsjkjtjokli.supabase.co/rest/v1/';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1Z3FuZXJ3d3JzamtqdGpva2xpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyOTQ1NTMsImV4cCI6MjEwNjg3MDU1M30.f3TmdXatD-u5CoOYzBkzaVW9mUYiBrtXWlpm4D4h1SQ';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     let currentCategory = 'demonlist'; 
     let currentTier = 4;
     let isAdminMode = false;
+
+    let players = [];
+    let levels = [];
+    let completions = [];
 
     const categoryConfig = {
       demonlist: { prefix: 'Classic', btnBg: 'bg-red-600', textAccent: 'text-red-400', borderAccent: 'border-red-500/30' },
@@ -173,14 +169,64 @@
       packs:     { prefix: 'Packs', btnBg: 'bg-sky-600', textAccent: 'text-sky-400', borderAccent: 'border-sky-500/30' }
     };
 
-    const players = [
-      { id: 1, username: "cincb" },
-      { id: 2, username: "после утра" },
-      { id: 3, username: "Marxism" }
-    ];
+    // ----------------------------------------------------
+    // FETCH DATA FROM SUPABASE ON STARTUP
+    // ----------------------------------------------------
+    async function loadAllData() {
+      const [resPlayers, resLevels, resCompletions] = await Promise.all([
+        db.from('players').select('*'),
+        db.from('levels').select('*'),
+        db.from('completions').select('*')
+      ]);
 
-    const levels = [];
-    let completions = [];
+      if (resPlayers.error) console.error('Error fetching players:', resPlayers.error);
+      if (resLevels.error) console.error('Error fetching levels:', resLevels.error);
+      if (resCompletions.error) console.error('Error fetching completions:', resCompletions.error);
+
+      players = resPlayers.data || [];
+      levels = resLevels.data || [];
+      completions = resCompletions.data || [];
+
+      renderLevels();
+      renderLeaderboard();
+    }
+
+    // ----------------------------------------------------
+    // SAVE ADMIN COMPLETIONS TO SUPABASE
+    // ----------------------------------------------------
+    async function togglePlayerCompletion(playerId, levelId) {
+      const existingIndex = completions.findIndex(c => c.player_id === playerId && c.level_id === levelId);
+
+      if (existingIndex > -1) {
+        // Delete completion record
+        const { error } = await db
+          .from('completions')
+          .delete()
+          .eq('player_id', playerId)
+          .eq('level_id', levelId);
+
+        if (!error) {
+          completions.splice(existingIndex, 1);
+        } else {
+          console.error("Failed to delete completion:", error);
+        }
+      } else {
+        // Insert new completion record
+        const { data, error } = await db
+          .from('completions')
+          .insert([{ player_id: playerId, level_id: levelId }])
+          .select();
+
+        if (!error && data.length > 0) {
+          completions.push(data[0]);
+        } else {
+          console.error("Failed to add completion:", error);
+        }
+      }
+
+      renderLevels();
+      renderLeaderboard();
+    }
 
     function getPoints(level) {
       const tierRanges = {
@@ -207,17 +253,6 @@
       isAdminMode = !isAdminMode;
       document.getElementById('admin-bar').classList.toggle('hidden', !isAdminMode);
       renderLevels();
-    }
-
-    function togglePlayerCompletion(playerId, levelId) {
-      const existingIndex = completions.findIndex(c => c.player_id === playerId && c.level_id === levelId);
-      if (existingIndex > -1) {
-        completions.splice(existingIndex, 1);
-      } else {
-        completions.push({ player_id: playerId, level_id: levelId });
-      }
-      renderLevels();
-      renderLeaderboard();
     }
 
     function renderLevels() {
@@ -453,8 +488,9 @@
       document.getElementById('player-modal').classList.add('hidden');
     }
 
+    // Initialize application
     switchMainTab('home');
-    renderLeaderboard();
+    loadAllData();
   </script>
 </body>
 </html>
