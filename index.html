@@ -1,419 +1,653 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cudGD Demonlist</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cudGD - Geometry Dash Demon List</title>
+  <style>
+    /* ==========================================
+       1. CORE STYLES & RESET
+       ========================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #0f1117;
+      color: #e2e8f0;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* Top Header & Section Navigation */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid #334155;
+      padding-bottom: 1rem;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #8b5cf6;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: #1e293b;
+      padding: 0.3rem;
+      border-radius: 10px;
+      border: 1px solid #334155;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: #8b5cf6;
+      color: #ffffff;
+    }
+
+    /* ==========================================
+       2. SPLIT VIEW LAYOUT (DESKTOP & IPAD)
+       ========================================== */
+    .split-view-container {
+      display: flex;
+      gap: 1.5rem;
+      width: 100%;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    /* Left Panel: List (50% Width) */
+    .split-view-left {
+      flex: 1;
+      width: 50%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    .split-view-left::-webkit-scrollbar {
+      width: 6px;
+    }
+    .split-view-left::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+
+    /* Right Panel: Sticky Details (50% Width) */
+    .split-view-right {
+      flex: 1;
+      width: 50%;
+      position: sticky;
+      top: 1.5rem;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    /* Interactive Cards */
+    .item-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .item-card:hover {
+      background: #273549;
+      border-color: #6366f1;
+      transform: translateY(-1px);
+    }
+
+    .item-card.active {
+      border-color: #8b5cf6;
+      background: #2e2654;
+    }
+
+    .card-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .rank {
+      font-weight: 700;
+      color: #a78bfa;
+      min-width: 32px;
+    }
+
+    .item-name {
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .item-subtext {
+      font-size: 0.8rem;
+      color: #64748b;
+      margin-top: 0.1rem;
+    }
+
+    .item-pts {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+
+    /* Detail View Box */
+    .detail-card {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .detail-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #334155;
+    }
+
+    .detail-title {
+      font-size: 1.5rem;
+      color: #f8fafc;
+    }
+
+    .close-btn {
+      display: none; /* Mobile slide-over only */
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.8rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .stat-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.25rem;
+      background: #0f1117;
+      padding: 0.85rem 1rem;
+      border-radius: 8px;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: #64748b;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+
+    .section-title {
+      font-size: 0.9rem;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .detail-list {
+      list-style: none;
+    }
+
+    .detail-list li {
+      padding: 0.6rem 0.8rem;
+      background: #0f1117;
+      border-radius: 6px;
+      margin-bottom: 0.4rem;
+      font-size: 0.95rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Dynamic Badges */
+    .badge {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .badge-top10 { background: #581c87; color: #e9d5ff; }
+    .badge-victor { background: #064e3b; color: #a7f3d0; }
+
+    /* Empty Placeholder State */
+    .detail-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 300px;
+      border: 2px dashed #334155;
+      border-radius: 12px;
+      color: #64748b;
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    /* Mobile Overlay Backdrop */
+    .drawer-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(2px);
+      z-index: 99;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    /* ==========================================
+       3. RESPONSIVE / MOBILE SLIDE-OVER DRAWER
+       ========================================== */
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
+      header {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+      }
+
+      /* Full width on mobile */
+      .split-view-left {
+        width: 100%;
+        max-height: none;
+      }
+
+      /* Transform right panel into Slide-Over Drawer */
+      .split-view-right {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 85%;
+        max-width: 400px;
+        height: 100vh;
+        max-height: 100vh;
+        background: #1e293b;
+        z-index: 100;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+        border-left: 1px solid #334155;
+        padding: 0;
+      }
+
+      .split-view-right.open {
+        transform: translateX(0);
+      }
+
+      .drawer-overlay.open {
+        display: block;
+        opacity: 1;
+      }
+
+      .detail-card {
+        border: none;
+        border-radius: 0;
+        height: 100%;
+        box-shadow: none;
+        overflow-y: auto;
+      }
+
+      .close-btn {
+        display: block;
+      }
+
+      .detail-placeholder {
+        display: none;
+      }
+    }
+  </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-12">
+<body>
 
-  <!-- Header Section -->
-  <header class="border-b border-slate-800 bg-slate-950">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-      
-      <!-- Logo Button (Locked to White Text, No Hover Color Shifts) -->
-      <button onclick="switchMainTab('home')" class="text-left focus:outline-none">
-        <h1 class="text-xl font-bold text-slate-100">
-          cudGD <span id="header-subtitle" class="text-slate-400 font-normal text-sm transition-colors">Home</span>
-        </h1>
-      </button>
-      
-      <!-- Navigation Tabs & Admin Toggle -->
-      <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-        <nav class="flex gap-1.5 min-w-max">
-          <!-- 1. Changelog (Grayscale) -->
-          <button id="btn-changelog" onclick="switchMainTab('changelog')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Changelog</button>
-          
-          <!-- 2. Demonlist (Red) -->
-          <button id="btn-demonlist" onclick="switchMainTab('demonlist')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Demonlist</button>
-          
-          <!-- 3. Pemonlist (Green) -->
-          <button id="btn-pemonlist" onclick="switchMainTab('pemonlist')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Pemonlist</button>
-
-          <!-- 4. Specials (Yellow) -->
-          <button id="btn-specials" onclick="switchMainTab('specials')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Specials</button>
-          
-          <!-- 5. Packs (Blue) -->
-          <button id="btn-packs" onclick="switchMainTab('packs')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Packs</button>
-          
-          <!-- 6. Leaderboard -->
-          <button id="btn-leaderboard" onclick="switchMainTab('leaderboard')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Leaderboard</button>
-        </nav>
-
-        <button onclick="toggleAdminPanel()" class="px-2.5 py-1.5 bg-slate-800 text-red-400 border border-red-500/30 rounded font-medium text-xs hover:bg-slate-700 ml-1 whitespace-nowrap">⚙️ Admin</button>
+  <div class="container">
+    <header>
+      <div class="logo">cudGD</div>
+      <div class="nav-tabs">
+        <button class="tab-btn active" id="tab-leaderboard" onclick="switchTab('leaderboard')">Leaderboard</button>
+        <button class="tab-btn" id="tab-levels" onclick="switchTab('levels')">Levels</button>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- ADMIN EDIT BAR -->
-  <div id="admin-bar" class="bg-red-950/40 border-b border-red-500/30 py-3 px-4 hidden">
-    <div class="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3">
-      <div class="flex items-center gap-2">
-        <span class="text-xs font-bold uppercase text-red-400 tracking-wider">Admin Mode Active:</span>
-        <span class="text-xs text-slate-300">Tap checkboxes on level cards to toggle completions.</span>
+    <!-- Backdrop for Mobile Slide-Over -->
+    <div class="drawer-overlay" id="drawer-overlay" onclick="closeDetail()"></div>
+
+    <div class="split-view-container">
+      <!-- LEFT HALF (50%): List (Players or Levels) -->
+      <div class="split-view-left" id="list-container">
+        <!-- Dynamic list rendering -->
       </div>
-      <button onclick="toggleAdminPanel()" class="text-xs text-red-400 hover:text-white underline">Exit Admin Mode</button>
-    </div>
-  </div>
 
-  <main class="max-w-5xl mx-auto px-4 mt-6">
-
-    <!-- 0. HOME PAGE -->
-    <section id="view-home" class="space-y-4">
-      <div class="bg-slate-950 border border-slate-800 rounded-lg p-6 space-y-3">
-        <h2 class="text-2xl font-bold text-slate-100">Welcome to cudGD</h2>
-        <p class="text-slate-400 text-sm leading-relaxed">
-          welcome my homies
-        </p>
-
-        <div class="p-3 bg-slate-900 border border-slate-800/80 rounded text-xs text-slate-500 italic mt-4">
-          this will be your home now and the sheets will be deprecated gng expect this to be done by next month
+      <!-- RIGHT HALF (50%): Sticky Panel (Desktop/iPad) / Slide-Over (Mobile) -->
+      <div class="split-view-right" id="detail-panel">
+        <div class="detail-placeholder">
+          <p id="placeholder-text">Select an item from the list to view detailed information.</p>
         </div>
       </div>
-    </section>
-
-    <!-- 1. CHANGELOG VIEW -->
-    <section id="view-changelog" class="hidden space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h2 class="text-lg font-bold text-slate-300">Changelog</h2>
-        <span class="text-xs text-slate-500 font-mono">Updates & Placement History</span>
-      </div>
-      
-      <div class="bg-slate-950 border border-slate-800 rounded p-6 text-center">
-        <p class="text-xs text-slate-500 italic">No changelog entries recorded yet.</p>
-      </div>
-    </section>
-
-    <!-- LEVEL LIST TEMPLATE (USED FOR DEMONLIST, PEMONLIST, SPECIALS, PACKS) -->
-    <section id="view-list-container" class="hidden space-y-4">
-      <!-- Tier Filter Tabs -->
-      <div class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800">
-        <span class="text-xs text-slate-400 font-bold uppercase tracking-wider mr-2">Tiers:</span>
-        <button id="tier-btn-1" onclick="selectTier(1)" class="px-3 py-1 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700">Tier 1</button>
-        <button id="tier-btn-2" onclick="selectTier(2)" class="px-3 py-1 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700">Tier 2</button>
-        <button id="tier-btn-3" onclick="selectTier(3)" class="px-3 py-1 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700">Tier 3</button>
-        <button id="tier-btn-4" onclick="selectTier(4)" class="px-3 py-1 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700">Tier 4</button>
-      </div>
-
-      <div class="flex justify-between items-center">
-        <h2 id="current-tier-title" class="text-lg font-bold text-slate-100">Classic Tier 4</h2>
-        <span id="level-count" class="text-xs text-slate-400 font-mono">0 Levels</span>
-      </div>
-      
-      <div id="levels-container" class="space-y-2"></div>
-    </section>
-
-    <!-- LEADERBOARD VIEW -->
-    <section id="view-leaderboard" class="hidden space-y-3">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-lg font-bold text-slate-200">Player Leaderboard</h2>
-        <span class="text-xs text-slate-400">Ranked by List Points</span>
-      </div>
-
-      <div id="leaderboard-container" class="space-y-2"></div>
-    </section>
-
-  </main>
-
-  <!-- PLAYER PROFILE MODAL -->
-  <div id="player-modal" class="fixed inset-0 bg-black/60 hidden flex items-center justify-center p-4 z-50">
-    <div class="bg-slate-900 border border-slate-700 rounded-lg w-full max-w-md p-5 space-y-4 relative">
-      <button onclick="closeModal()" class="absolute top-3 right-3 text-slate-400 hover:text-white font-bold">✕</button>
-      
-      <div class="border-b border-slate-800 pb-3">
-        <h3 id="modal-username" class="text-xl font-bold text-red-400">Player</h3>
-        <p id="modal-stats" class="text-xs text-slate-400 mt-0.5">Rank #1 • 0.00 Points</p>
-      </div>
-
-      <div>
-        <span class="text-xs text-slate-400 uppercase font-bold tracking-wide">Hardest Demon</span>
-        <p id="modal-hardest" class="text-base font-semibold text-slate-200 mt-0.5">None</p>
-      </div>
-
-      <div>
-        <span class="text-xs text-slate-400 uppercase font-bold tracking-wide">Completed Demons</span>
-        <div id="modal-completions" class="mt-2 space-y-1.5 max-h-48 overflow-y-auto pr-1"></div>
-      </div>
     </div>
   </div>
 
-  <!-- JAVASCRIPT LOGIC -->
   <script>
-    let currentCategory = 'demonlist'; // 'demonlist', 'pemonlist', 'specials', 'packs'
-    let currentTier = 4;
-    let isAdminMode = false;
-
-    // Category Metadata for Titles & Theme Button Styling
-    const categoryConfig = {
-      demonlist: { prefix: 'Classic', btnBg: 'bg-red-600', textAccent: 'text-red-400', borderAccent: 'border-red-500/30' },
-      pemonlist: { prefix: 'Platformer', btnBg: 'bg-emerald-600', textAccent: 'text-emerald-400', borderAccent: 'border-emerald-500/30' },
-      specials:  { prefix: 'Specials', btnBg: 'bg-amber-500 text-slate-950 font-bold', textAccent: 'text-amber-400', borderAccent: 'border-amber-500/30' },
-      packs:     { prefix: 'Packs', btnBg: 'bg-sky-600', textAccent: 'text-sky-400', borderAccent: 'border-sky-500/30' }
-    };
-
-    // 1. DATA
+    /* ==========================================
+       4. DATA STRUCTURE
+       ========================================== */
     const players = [
-      { id: 1, username: "cincb" },
-      { id: 2, username: "после утра" },
-      { id: 3, username: "Marxism" }
+      {
+        id: "putter",
+        name: "Putter",
+        rank: 1,
+        points: 1250,
+        demons: [
+          { name: "Sonic Wave Unlimited", pts: "85.4 pts" },
+          { name: "Acu", pts: "42.0 pts" },
+          { name: "BROWNOIX", pts: "38.5 pts" },
+          { name: "Color Beam", pts: "35.0 pts" },
+          { name: "Erosion", pts: "31.2 pts" },
+          { name: "Dismal Duststorm", pts: "29.8 pts" },
+          { name: "Leyak", pts: "25.0 pts" },
+          { name: "FFFFFF", pts: "22.1 pts" },
+          { name: "Windy Landscape", pts: "18.5 pts" },
+          { name: "Poltergeist", pts: "16.0 pts" },
+          { name: "Magma Bound", pts: "14.2 pts" },
+          { name: "Stalemate", pts: "12.0 pts" }
+        ]
+      },
+      {
+        id: "noon",
+        name: "Noon",
+        rank: 2,
+        points: 1100,
+        demons: [
+          { name: "Acu", pts: "42.0 pts" },
+          { name: "Leyak", pts: "25.0 pts" },
+          { name: "Windy Landscape", pts: "18.5 pts" },
+          { name: "Magma Bound", pts: "14.2 pts" }
+        ]
+      },
+      {
+        id: "max",
+        name: "Max",
+        rank: 3,
+        points: 950,
+        demons: [
+          { name: "FFFFFF", pts: "22.1 pts" },
+          { name: "Poltergeist", pts: "16.0 pts" },
+          { name: "Stalemate", pts: "12.0 pts" }
+        ]
+      }
     ];
 
-    const levels = [];
-    let completions = [];
-
-    // Dynamic Tier Point Calculation
-    function getPoints(level) {
-      const tierRanges = {
-        4: { max: 1000, min: 800 },
-        3: { max: 800, min: 500 },
-        2: { max: 500, min: 250 },
-        1: { max: 250, min: 100 }
-      };
-
-      const range = tierRanges[level.tier] || { max: 100, min: 0 };
-      const totalLevelsInTier = levels.filter(l => l.category === level.category && l.tier === level.tier).length;
-
-      if (totalLevelsInTier <= 1) {
-        return range.max.toFixed(1);
+    const levels = [
+      {
+        id: "swu",
+        name: "Sonic Wave Unlimited",
+        rank: 1,
+        creator: "APTeam & more",
+        points: 85.4,
+        victors: ["Putter"]
+      },
+      {
+        id: "acu",
+        name: "Acu",
+        rank: 2,
+        creator: "neigfeu",
+        points: 42.0,
+        victors: ["Putter", "Noon"]
+      },
+      {
+        id: "brownoix",
+        name: "BROWNOIX",
+        rank: 3,
+        creator: "GabeLucario",
+        points: 38.5,
+        victors: ["Putter"]
+      },
+      {
+        id: "colorbeam",
+        name: "Color Beam",
+        rank: 4,
+        creator: "KrmaL",
+        points: 35.0,
+        victors: ["Putter"]
+      },
+      {
+        id: "leyak",
+        name: "Leyak",
+        rank: 5,
+        creator: "Enzore",
+        points: 25.0,
+        victors: ["Putter", "Noon"]
       }
+    ];
 
-      const step = (range.max - range.min) / (totalLevelsInTier - 1);
-      const calculatedPoints = range.max - ((level.placement - 1) * step);
+    /* ==========================================
+       5. VIEW STATE & LOGIC
+       ========================================== */
+    let currentTab = "leaderboard";
+    let selectedItemId = null;
 
-      return calculatedPoints.toFixed(1);
+    // Switch between Leaderboard and Levels tab
+    function switchTab(tab) {
+      currentTab = tab;
+      selectedItemId = null;
+
+      // Update Tab UI
+      document.getElementById("tab-leaderboard").classList.toggle("active", tab === "leaderboard");
+      document.getElementById("tab-levels").classList.toggle("active", tab === "levels");
+
+      // Reset detail panel to default placeholder
+      resetDetailPanel();
+
+      // Render updated list
+      renderList();
     }
 
-    function toggleAdminPanel() {
-      isAdminMode = !isAdminMode;
-      document.getElementById('admin-bar').classList.toggle('hidden', !isAdminMode);
-      renderLevels();
-    }
+    // Render left panel list
+    function renderList() {
+      const container = document.getElementById("list-container");
 
-    function togglePlayerCompletion(playerId, levelId) {
-      const existingIndex = completions.findIndex(c => c.player_id === playerId && c.level_id === levelId);
-      if (existingIndex > -1) {
-        completions.splice(existingIndex, 1);
-      } else {
-        completions.push({ player_id: playerId, level_id: levelId });
-      }
-      renderLevels();
-      renderLeaderboard();
-    }
-
-    function renderLevels() {
-      const container = document.getElementById('levels-container');
-      container.innerHTML = '';
-      
-      const config = categoryConfig[currentCategory] || categoryConfig.demonlist;
-
-      // Filter levels by active category and active tier
-      const filteredLevels = levels
-        .filter(l => l.category === currentCategory && l.tier === currentTier)
-        .sort((a, b) => a.placement - b.placement);
-
-      // Set clean white title with proper prefix
-      document.getElementById('current-tier-title').textContent = `${config.prefix} Tier ${currentTier}`;
-      document.getElementById('level-count').textContent = `${filteredLevels.length} Levels`;
-
-      // Update Tier Button styles
-      [1, 2, 3, 4].forEach(t => {
-        const btn = document.getElementById(`tier-btn-${t}`);
-        if (t === currentTier) {
-          btn.className = `px-3 py-1 ${config.btnBg} rounded text-xs font-semibold text-white`;
-        } else {
-          btn.className = "px-3 py-1 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700";
-        }
-      });
-
-      if (filteredLevels.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 italic py-6 text-center border border-slate-800 rounded bg-slate-950">No levels added to ${config.prefix} Tier ${currentTier} yet.</p>`;
-        return;
-      }
-
-      filteredLevels.forEach(level => {
-        const points = getPoints(level);
-        const conquerors = completions
-          .filter(c => c.level_id === level.id)
-          .map(c => players.find(p => p.id === c.player_id)?.username)
-          .filter(Boolean);
-
-        const card = document.createElement('div');
-        card.className = "bg-slate-950 border border-slate-800 rounded p-3 flex flex-col gap-2 hover:border-slate-700 transition";
-        
-        let adminHtml = '';
-        if (isAdminMode) {
-          adminHtml = `
-            <div class="border-t border-slate-800/80 pt-2 flex items-center gap-3 text-xs text-slate-400">
-              <span class="font-bold ${config.textAccent}">Victor Check:</span>
-              ${players.map(p => {
-                const isBeaten = completions.some(c => c.player_id === p.id && c.level_id === level.id);
-                return `
-                  <label class="flex items-center gap-1 cursor-pointer hover:text-slate-200">
-                    <input type="checkbox" ${isBeaten ? 'checked' : ''} onchange="togglePlayerCompletion(${p.id},${level.id})" class="accent-red-500 rounded">
-                    ${p.username}
-                  </label>
-                `;
-              }).join('')}
-            </div>
-          `;
-        }
-
-        card.innerHTML = `
-          <div class="flex justify-between items-center">
-            <div class="flex items-center gap-3">
-              <span class="text-base font-bold ${config.textAccent} font-mono">#${level.placement}</span>
+      if (currentTab === "leaderboard") {
+        container.innerHTML = players.map(p => `
+          <div 
+            class="item-card ${selectedItemId === p.id ? 'active' : ''}" 
+            onclick="selectItem('${p.id}')"
+          >
+            <div class="card-left">
+              <span class="rank">#${p.rank}</span>
               <div>
-                <div class="flex items-center gap-2">
-                  <h3 class="font-bold text-slate-100">${level.name}</h3>
-                  <span class="text-xs bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded">Tier ${level.tier}</span>
-                </div>
-                <p class="text-xs text-slate-400">by ${level.creator}</p>
+                <div class="item-name">${p.name}</div>
+                <div class="item-subtext">${p.demons.length} Demons</div>
               </div>
             </div>
-            <div class="text-right">
-              <span class="text-xs text-slate-300 font-mono block">${points} pts</span>
-              <span class="text-xs text-slate-500">${conquerors.length} Victor(s)</span>
-            </div>
+            <span class="item-pts">${p.points} pts</span>
           </div>
-          ${adminHtml}
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function selectTier(tierNumber) {
-      currentTier = tierNumber;
-      renderLevels();
-    }
-
-    function renderLeaderboard() {
-      const container = document.getElementById('leaderboard-container');
-      container.innerHTML = '';
-
-      const leaderboardData = players.map(player => {
-        const playerCompletions = completions.filter(c => c.player_id === player.id);
-        const playerLevels = playerCompletions
-          .map(c => levels.find(l => l.id === c.level_id))
-          .filter(Boolean)
-          .sort((a, b) => {
-            if (b.tier !== a.tier) return b.tier - a.tier;
-            return a.placement - b.placement;
-          });
-
-        const totalPoints = playerLevels.reduce((sum, l) => sum + parseFloat(getPoints(l)), 0);
-        const hardestDemon = playerLevels.length > 0 
-          ? `${playerLevels[0].name} (Tier ${playerLevels[0].tier} #${playerLevels[0].placement})` 
-          : "None";
-
-        return {
-          ...player,
-          totalPoints: +totalPoints.toFixed(1),
-          demonsBeaten: playerLevels.length,
-          hardestDemon,
-          completedLevels: playerLevels
-        };
-      }).sort((a, b) => b.totalPoints - a.totalPoints);
-
-      leaderboardData.forEach((player, index) => {
-        const rank = index + 1;
-        const card = document.createElement('div');
-        card.className = "bg-slate-950 border border-slate-800 rounded p-3 flex justify-between items-center cursor-pointer hover:bg-slate-800/50 transition";
-        card.onclick = () => openPlayerModal(player, rank);
-        
-        card.innerHTML = `
-          <div class="flex items-center gap-3">
-            <span class="font-bold text-sm ${rank === 1 ? 'text-amber-400' : 'text-slate-400'}">#${rank}</span>
-            <div>
-              <h4 class="font-bold text-slate-100">${player.username}</h4>
-              <p class="text-xs text-slate-400">${player.demonsBeaten} Demons Beaten</p>
-            </div>
-          </div>
-          <div class="text-right">
-            <span class="font-mono font-bold text-red-400">${player.totalPoints}</span>
-            <span class="text-xs text-slate-500 block">PTS</span>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    // MAIN NAVIGATION SWITCHER WITH PROPER SUBTITLE & VIEW SWITCHING
-    function switchMainTab(tab) {
-      const views = ['home', 'changelog', 'list-container', 'leaderboard'];
-      const navButtons = ['changelog', 'demonlist', 'pemonlist', 'specials', 'packs', 'leaderboard'];
-      
-      views.forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
-      navButtons.forEach(b => {
-        const btn = document.getElementById(`btn-${b}`);
-        if (btn) btn.className = "px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition";
-      });
-
-      const subtitle = document.getElementById('header-subtitle');
-
-      if (tab === 'home') {
-        document.getElementById('view-home').classList.remove('hidden');
-        subtitle.textContent = "V3";
-        subtitle.className = "text-slate-400 font-normal text-sm transition-colors";
-      } else if (tab === 'changelog') {
-        document.getElementById('view-changelog').classList.remove('hidden');
-        document.getElementById('btn-changelog').className = "px-3 py-1.5 bg-slate-200 text-slate-900 rounded font-medium text-xs transition";
-        subtitle.textContent = "Changelog";
-        subtitle.className = "text-slate-400 font-normal text-sm transition-colors";
-      } else if (tab === 'leaderboard') {
-        document.getElementById('view-leaderboard').classList.remove('hidden');
-        document.getElementById('btn-leaderboard').className = "px-3 py-1.5 bg-indigo-600 text-white rounded font-medium text-xs transition";
-        subtitle.textContent = "Leaderboard";
-        subtitle.className = "text-indigo-400 font-normal text-sm transition-colors";
+        `).join("");
       } else {
-        // Handle Demonlist, Pemonlist, Specials, Packs using unified container
-        currentCategory = tab;
-        document.getElementById('view-list-container').classList.remove('hidden');
-        
-        const activeBtn = document.getElementById(`btn-${tab}`);
-        const config = categoryConfig[tab];
-        if (activeBtn && config) {
-          activeBtn.className = `px-3 py-1.5 ${config.btnBg} text-white rounded font-medium text-xs transition`;
-          subtitle.textContent = config.prefix;
-          subtitle.className = `${config.textAccent} font-normal text-sm transition-colors`;
-        }
-        renderLevels();
+        container.innerHTML = levels.map(l => `
+          <div 
+            class="item-card ${selectedItemId === l.id ? 'active' : ''}" 
+            onclick="selectItem('${l.id}')"
+          >
+            <div class="card-left">
+              <span class="rank">#${l.rank}</span>
+              <div>
+                <div class="item-name">${l.name}</div>
+                <div class="item-subtext">by ${l.creator}</div>
+              </div>
+            </div>
+            <span class="item-pts">${l.points} pts</span>
+          </div>
+        `).join("");
       }
     }
 
-    function openPlayerModal(player, rank) {
-      document.getElementById('modal-username').textContent = player.username;
-      document.getElementById('modal-stats').textContent = `Rank #${rank} • ${player.totalPoints} Points`;
-      document.getElementById('modal-hardest').textContent = player.hardestDemon;
+    // Select Player or Level
+    function selectItem(id) {
+      selectedItemId = id;
+      renderList();
 
-      const listContainer = document.getElementById('modal-completions');
-      listContainer.innerHTML = '';
+      const detailPanel = document.getElementById("detail-panel");
+      const overlay = document.getElementById("drawer-overlay");
 
-      if (player.completedLevels.length === 0) {
-        listContainer.innerHTML = `<p class="text-xs text-slate-500 italic">No beaten demons recorded yet.</p>`;
+      if (currentTab === "leaderboard") {
+        const player = players.find(p => p.id === id);
+        detailPanel.innerHTML = `
+          <div class="detail-card">
+            <div class="detail-header">
+              <h2 class="detail-title">${player.name}</h2>
+              <button class="close-btn" onclick="closeDetail()">&times;</button>
+            </div>
+
+            <div class="stat-row">
+              <div class="stat-item">
+                <span class="stat-label">Global Rank</span>
+                <span class="stat-value">#${player.rank}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Total Points</span>
+                <span class="stat-value">${player.points} pts</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Demons Beat</span>
+                <span class="stat-value">${player.demons.length}</span>
+              </div>
+            </div>
+
+            <p class="section-title">Completed Demons</p>
+            <ul class="detail-list">
+              ${player.demons.map(d => `
+                <li>
+                  <span>${d.name}</span>
+                  <span style="color: #a78bfa; font-weight: 600;">${d.pts}</span>
+                </li>
+              `).join("")}
+            </ul>
+          </div>
+        `;
       } else {
-        player.completedLevels.forEach(lvl => {
-          const item = document.createElement('div');
-          item.className = "bg-slate-950 p-2 rounded flex justify-between items-center text-xs border border-slate-800";
-          item.innerHTML = `
-            <span class="font-semibold text-slate-200">Tier ${lvl.tier} #${lvl.placement} - ${lvl.name}</span>
-            <span class="text-slate-400 font-mono">${getPoints(lvl)} pts</span>
-          `;
-          listContainer.appendChild(item);
-        });
+        const level = levels.find(l => l.id === id);
+        detailPanel.innerHTML = `
+          <div class="detail-card">
+            <div class="detail-header">
+              <h2 class="detail-title">${level.name}</h2>
+              <button class="close-btn" onclick="closeDetail()">&times;</button>
+            </div>
+
+            <div class="stat-row">
+              <div class="stat-item">
+                <span class="stat-label">List Rank</span>
+                <span class="stat-value">#${level.rank}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">Point Yield</span>
+                <span class="stat-value">${level.points} pts</span>
+              </div>
+            </div>
+
+            <p class="section-title">Level Information</p>
+            <ul class="detail-list" style="margin-bottom: 1rem;">
+              <li>
+                <span>Creator</span>
+                <span style="color: #38bdf8; font-weight: 500;">${level.creator}</span>
+              </li>
+            </ul>
+
+            <p class="section-title">Verified Victors (${level.victors.length})</p>
+            <ul class="detail-list">
+              ${level.victors.map(v => `
+                <li>
+                  <span>${v}</span>
+                  <span class="badge badge-victor">100%</span>
+                </li>
+              `).join("")}
+            </ul>
+          </div>
+        `;
       }
 
-      document.getElementById('player-modal').classList.remove('hidden');
+      // Open mobile slide-over drawer
+      detailPanel.classList.add("open");
+      overlay.classList.add("open");
     }
 
-    function closeModal() {
-      document.getElementById('player-modal').classList.add('hidden');
+    // Reset panel to placeholder state
+    function resetDetailPanel() {
+      const detailPanel = document.getElementById("detail-panel");
+      const text = currentTab === "leaderboard" 
+        ? "Select a player from the list to view their completed demons."
+        : "Select a level to view creator details and verified victors.";
+
+      detailPanel.innerHTML = `
+        <div class="detail-placeholder">
+          <p>${text}</p>
+        </div>
+      `;
     }
 
-    // Initial Load (Defaults to Home)
-    switchMainTab('home');
-    renderLeaderboard();
+    // Close mobile slide-over
+    function closeDetail() {
+      const detailPanel = document.getElementById("detail-panel");
+      const overlay = document.getElementById("drawer-overlay");
+
+      detailPanel.classList.remove("open");
+      overlay.classList.remove("open");
+
+      selectedItemId = null;
+      renderList();
+    }
+
+    // Boot initial view
+    renderList();
   </script>
 </body>
 </html>
