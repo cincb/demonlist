@@ -37,9 +37,14 @@
                 .order('order_index', { ascending: true });
 
             if (error) {
-                console.error('Error fetching demons:', error);
+                document.body.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
                 return;
             }
+
+            // This will literally print how many items came back from Supabase onto your screen
+            document.body.innerHTML += `<p style="color: cyan;">Debug: Fetched ${demons ? demons.length : 'null'} rows from Supabase.</p>`;
+
+            if (!demons || demons.length === 0) return;
 
             const tbody = document.getElementById('demon-tbody');
             tbody.innerHTML = '';
@@ -49,9 +54,9 @@
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>#${rank}</td>
-                    <td>${demon.name}</td>
-                    <td>${demon.publisher}</td>
-                    <td>${demon.points}</td>
+                    <td>${demon.name ?? ''}</td>
+                    <td>${demon.publisher ?? ''}</td>
+                    <td>${demon.points ?? ''}</td>
                 `;
             });
         }
