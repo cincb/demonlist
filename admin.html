@@ -8,18 +8,18 @@
 
     <h1>Demon List Admin Panel</h1>
 
-    <!-- LOGIN SECTION (Shown if not logged in) -->
+    <!-- LOGIN SECTION -->
     <div id="login-section">
         <h3>Admin Login</h3>
         <input type="email" id="email" placeholder="Your Email"><br><br>
         <input type="password" id="password" placeholder="Password"><br><br>
-        <button onclick="login()">Log In</button>
+        <button type="button" onclick="handleLogin()">Log In</button>
         <p id="login-error" style="color: red;"></p>
     </div>
 
-    <!-- ADMIN DASHBOARD (Hidden until you log in) -->
+    <!-- ADMIN DASHBOARD (Hidden until logged in) -->
     <div id="admin-section" style="display: none;">
-        <p>Logged in successfully! <button onclick="logout()">Log Out</button></p>
+        <p>Logged in successfully! <button type="button" onclick="logout()">Log Out</button></p>
         
         <hr>
 
@@ -64,20 +64,32 @@
         checkUser();
 
         // Login function
-        async function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+        async function handleLogin() {
+            const emailField = document.getElementById('email').value.trim();
+            const passwordField = document.getElementById('password').value.trim();
             const errorElement = document.getElementById('login-error');
             
+            if (!emailField || !passwordField) {
+                errorElement.innerText = "Please enter both email and password.";
+                return;
+            }
+
             errorElement.innerText = "Logging in...";
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-            
-            if (error) {
-                errorElement.innerText = error.message;
-            } else {
-                errorElement.innerText = "";
-                showAdminPanel();
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: emailField,
+                    password: passwordField
+                });
+                
+                if (error) {
+                    errorElement.innerText = error.message;
+                } else {
+                    errorElement.innerText = "";
+                    showAdminPanel();
+                }
+            } catch (err) {
+                errorElement.innerText = "Error: " + err.message;
             }
         }
 
@@ -136,7 +148,7 @@
                 row.innerHTML = `
                     <td>${demon.name}</td>
                     <td>${demon.points}</td>
-                    <td><button onclick="deleteDemon('${demon.id}')" style="background-color: red; color: white;">Delete</button></td>
+                    <td><button type="button" onclick="deleteDemon('${demon.id}')" style="background-color: red; color: white;">Delete</button></td>
                 `;
             });
         }
