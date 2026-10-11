@@ -67,12 +67,16 @@
         async function login() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const errorElement = document.getElementById('login-error');
+            
+            errorElement.innerText = "Logging in...";
 
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             
             if (error) {
-                document.getElementById('login-error').innerText = error.message;
+                errorElement.innerText = error.message;
             } else {
+                errorElement.innerText = "";
                 showAdminPanel();
             }
         }
