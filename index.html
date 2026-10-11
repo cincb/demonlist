@@ -25,43 +25,50 @@
     <!-- Import Supabase JS Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Replace these with your actual Supabase project credentials
-        const SUPABASE_URL = 'https://sugqnerwwrsjkjtjokli.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_ZNIVVo-1KbXyAMDDfCSY_w_XMfcxyuW';
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Wrap everything to ensure it runs safely
+        (async function() {
+            try {
+                const SUPABASE_URL = 'https://sugqnerwwrsjkjtjokli.supabase.co';
+                const SUPABASE_ANON_KEY = 'sb_publishable_ZNIVVo-1KbXyAMDDfCSY_w_XMfcxyuW';
+                
+                if (!window.supabase) {
+                    document.body.innerHTML += `<p style="color: red;">Error: Supabase library failed to load!</p>`;
+                    return;
+                }
 
-        async function fetchDemons() {
-            const { data: demons, error } = await supabase
-                .from('demons')
-                .select('*')
-                .order('order_index', { ascending: true });
+                const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            if (error) {
-                document.body.innerHTML += `<p style="color: red;">Error: ${error.message}</p>`;
-                return;
+                const { data: demons, error } = await supabase
+                    .from('demons')
+                    .select('*')
+                    .order('order_index', { ascending: true });
+
+                if (error) {
+                    document.body.innerHTML += `<p style="color: red;">Supabase Error: ${error.message}</p>`;
+                    return;
+                }
+
+                document.body.innerHTML += `<p style="color: blue;">Debug: Fetched ${demons ? demons.length : 0} rows.</p>`;
+
+                if (!demons || demons.length === 0) return;
+
+                const tbody = document.getElementById('demon-tbody');
+                tbody.innerHTML = '';
+
+                demons.forEach((demon, index) => {
+                    const rank = index + 1;
+                    const row = tbody.insertRow();
+                    row.innerHTML = `
+                        <td>#${rank}</td>
+                        <td>${demon.name ?? ''}</td>
+                        <td>${demon.publisher ?? ''}</td>
+                        <td>${demon.points ?? ''}</td>
+                    `;
+                });
+            } catch (err) {
+                document.body.innerHTML += `<p style="color: red;">Script Error: ${err.message}</p>`;
             }
-
-            // This will literally print how many items came back from Supabase onto your screen
-            document.body.innerHTML += `<p style="color: cyan;">Debug: Fetched ${demons ? demons.length : 'null'} rows from Supabase.</p>`;
-
-            if (!demons || demons.length === 0) return;
-
-            const tbody = document.getElementById('demon-tbody');
-            tbody.innerHTML = '';
-
-            demons.forEach((demon, index) => {
-                const rank = index + 1;
-                const row = tbody.insertRow();
-                row.innerHTML = `
-                    <td>#${rank}</td>
-                    <td>${demon.name ?? ''}</td>
-                    <td>${demon.publisher ?? ''}</td>
-                    <td>${demon.points ?? ''}</td>
-                `;
-            });
-        }
-
-        fetchDemons();
+        })();
     </script>
 </body>
 </html>
