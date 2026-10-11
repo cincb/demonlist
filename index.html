@@ -41,7 +41,7 @@
                 const { data: demons, error } = await supabase
                     .from('demons')
                     .select('*')
-                    .order('order_index', { ascending: true });
+                    .order('points', { ascending: false });
 
                 if (error) {
                     document.body.innerHTML += `<p style="color: red;">Supabase Error: ${error.message}</p>`;
