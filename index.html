@@ -1,503 +1,62 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>cudGD Demonlist</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Supabase JS Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-sdk@2"></script>
+    <meta charset="UTF-8">
+    <title>Demon List</title>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen pb-12">
+<body>
 
-  <!-- Header Section -->
-  <header class="border-b border-slate-800 bg-slate-950">
-    <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-      
-      <!-- Logo Button -->
-      <button onclick="switchMainTab('home')" class="text-left focus:outline-none">
-        <h1 class="text-xl font-bold text-slate-100">
-          cudGD <span id="header-subtitle" class="text-slate-400 font-normal text-sm transition-colors">Home</span>
-        </h1>
-      </button>
-      
-      <!-- Navigation Tabs & Admin Toggle -->
-      <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
-        <nav class="flex gap-1.5 min-w-max">
-          <button id="btn-changelog" onclick="switchMainTab('changelog')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Changelog</button>
-          <button id="btn-demonlist" onclick="switchMainTab('demonlist')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Demonlist</button>
-          <button id="btn-pemonlist" onclick="switchMainTab('pemonlist')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Pemonlist</button>
-          <button id="btn-specials" onclick="switchMainTab('specials')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Specials</button>
-          <button id="btn-packs" onclick="switchMainTab('packs')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Packs</button>
-          <button id="btn-leaderboard" onclick="switchMainTab('leaderboard')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition">Leaderboard</button>
-        </nav>
+    <h1>Demon List</h1>
+    
+    <table border="1" id="demon-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Verifier</th>
+                <th>Points</th>
+            </tr>
+        </thead>
+        <tbody id="demon-tbody">
+            <!-- JavaScript will inject rows here -->
+        </tbody>
+    </table>
 
-        <button onclick="toggleAdminPanel()" class="px-2.5 py-1.5 bg-slate-800 text-red-400 border border-red-500/30 rounded font-medium text-xs hover:bg-slate-700 ml-1 whitespace-nowrap">⚙ Admin</button>
-      </div>
-    </div>
-  </header>
+    <!-- Import Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Replace these with your actual Supabase project credentials
+        const SUPABASE_URL = 'https://sugqnerwwrsjkjtjokli.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_ZNIVVo-1KbXyAMDDfCSY_w_XMfcxyuW';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  <!-- ADMIN EDIT BAR & ENTRY FORMS -->
-  <div id="admin-bar" class="bg-red-950/40 border-b border-red-500/30 py-4 px-4 hidden">
-    <div class="max-w-5xl mx-auto space-y-4">
-      <div class="flex justify-between items-center border-b border-red-500/20 pb-2">
-        <span class="text-xs font-bold uppercase text-red-400 tracking-wider">⚙ Admin Control Panel</span>
-        <button onclick="toggleAdminPanel()" class="text-xs text-red-400 hover:text-white underline">Exit Admin Mode</button>
-      </div>
+        async function fetchDemons() {
+            const { data: demons, error } = await supabase
+                .from('demons')
+                .select('*')
+                .order('order_index', { ascending: true });
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- Add Level Form -->
-        <form onsubmit="handleAddLevel(event)" class="bg-slate-950 border border-slate-800 p-3 rounded space-y-2">
-          <h4 class="text-xs font-bold text-slate-200 uppercase">Add New Level</h4>
-          <div class="grid grid-cols-2 gap-2">
-            <input id="admin-level-name" type="text" placeholder="Level Name" required class="bg-slate-900 border border-slate-800 text-xs text-slate-200 p-2 rounded focus:outline-none focus:border-red-500">
-            <input id="admin-level-creator" type="text" placeholder="Creator" required class="bg-slate-900 border border-slate-800 text-xs text-slate-200 p-2 rounded focus:outline-none focus:border-red-500">
-          </div>
-          <div class="grid grid-cols-3 gap-2">
-            <select id="admin-level-category" class="bg-slate-900 border border-slate-800 text-xs text-slate-200 p-2 rounded focus:outline-none">
-              <option value="demonlist">Demonlist</option>
-              <option value="pemonlist">Pemonlist</option>
-              <option value="specials">Specials</option>
-              <option value="packs">Packs</option>
-            </select>
-            <select id="admin-level-tier" class="bg-slate-900 border border-slate-800 text-xs text-slate-200 p-2 rounded focus:outline-none">
-              <option value="4">Tier 4</option>
-              <option value="3">Tier 3</option>
-              <option value="2">Tier 2</option>
-              <option value="1">Tier 1</option>
-            </select>
-            <input id="admin-level-placement" type="number" min="1" placeholder="Rank/Placement" required class="bg-slate-900 border border-slate-800 text-xs text-slate-200 p-2 rounded focus:outline-none">
-          </div>
-          <button type="submit" class="w-full bg-red-600 hover:bg-red-500 text-white text-xs font-bold py-1.5 rounded transition">+ Add Level</button>
-        </form>
+            if (error) {
+                console.error('Error fetching demons:', error);
+                return;
+            }
 
-        <!-- Add Player Form -->
-        <form onsubmit="handleAddPlayer(event)" class="bg-slate-950 border border-slate-800 p-3 rounded space-y-2 flex flex-col justify-between">
-          <div>
-            <h4 class="text-xs font-bold text-slate-200 uppercase mb-2">Add New Player</h4>
-            <input id="admin-player-username" type="text" placeholder="Username" required class="w-full bg-slate-900 border border-slate-800 text-xs text-slate-200 p-2 rounded focus:outline-none focus:border-red-500">
-          </div>
-          <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold py-1.5 rounded transition">+ Add Player</button>
-        </form>
-      </div>
-    </div>
-  </div>
+            const tbody = document.getElementById('demon-tbody');
+            tbody.innerHTML = '';
 
-  <main class="max-w-5xl mx-auto px-4 mt-6">
-
-    <!-- 0. HOME PAGE -->
-    <section id="view-home" class="space-y-4">
-      <div class="bg-slate-950 border border-slate-800 rounded-lg p-6 space-y-3">
-        <h2 class="text-2xl font-bold text-slate-100">Welcome to cudGD</h2>
-        <p class="text-slate-400 text-sm leading-relaxed">welcome my homies</p>
-
-        <div class="p-3 bg-slate-900 border border-slate-800/80 rounded text-xs text-slate-500 italic mt-4">
-          this will be your home now and the sheets will be deprecated gng expect this to be done by next month
-        </div>
-      </div>
-    </section>
-
-    <!-- 1. CHANGELOG VIEW -->
-    <section id="view-changelog" class="hidden space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <h2 class="text-lg font-bold text-slate-300">Changelog</h2>
-        <span class="text-xs text-slate-500 font-mono">Updates & Placement History</span>
-      </div>
-      <div class="bg-slate-950 border border-slate-800 rounded p-6 text-center">
-        <p class="text-xs text-slate-500 italic">No changelog entries recorded yet.</p>
-      </div>
-    </section>
-
-    <!-- LEVEL LIST CONTAINER -->
-    <section id="view-list-container" class="hidden space-y-4">
-      <div class="bg-slate-950 border border-slate-800 rounded-lg p-4 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
-          <div>
-            <h2 id="current-tier-title" class="text-xl font-bold text-slate-100">Classic Tier 4</h2>
-            <p id="current-tier-desc" class="text-xs text-slate-400 mt-0.5">Select a tier below to view levels.</p>
-          </div>
-          <span id="level-count" class="text-xs px-2.5 py-1 bg-slate-900 border border-slate-800 text-slate-400 font-mono rounded self-start sm:self-auto">0 Levels Listed</span>
-        </div>
-
-        <div class="flex items-center gap-2 overflow-x-auto pb-1">
-          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider mr-1">Tiers:</span>
-          <button id="tier-btn-1" onclick="selectTier(1)" class="px-3.5 py-1.5 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700 transition">Tier 1</button>
-          <button id="tier-btn-2" onclick="selectTier(2)" class="px-3.5 py-1.5 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700 transition">Tier 2</button>
-          <button id="tier-btn-3" onclick="selectTier(3)" class="px-3.5 py-1.5 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700 transition">Tier 3</button>
-          <button id="tier-btn-4" onclick="selectTier(4)" class="px-3.5 py-1.5 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700 transition">Tier 4</button>
-        </div>
-      </div>
-      
-      <div id="levels-container" class="space-y-2.5"></div>
-    </section>
-
-    <!-- LEADERBOARD VIEW -->
-    <section id="view-leaderboard" class="hidden space-y-4">
-      <div class="bg-slate-950 border border-slate-800 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <div>
-          <h2 class="text-xl font-bold text-slate-100">Player Leaderboard</h2>
-          <p class="text-xs text-slate-400">Rankings calculated dynamically from total list points.</p>
-        </div>
-        <div class="text-xs text-indigo-400 bg-indigo-950/50 border border-indigo-500/20 px-3 py-1.5 rounded font-medium">
-          🏆 Top Player: <span id="top-player-name" class="font-bold text-slate-200">N/A</span>
-        </div>
-      </div>
-
-      <div class="hidden sm:grid grid-cols-12 px-4 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
-        <span class="col-span-1">Rank</span>
-        <span class="col-span-6">Player</span>
-        <span class="col-span-3 text-center">Demons Cleared</span>
-        <span class="col-span-2 text-right">Points</span>
-      </div>
-
-      <div id="leaderboard-container" class="space-y-2"></div>
-    </section>
-
-  </main>
-
-  <!-- JAVASCRIPT LOGIC -->
-  <script>
-    // ----------------------------------------------------
-    // SUPABASE SETUP (Replace with your actual keys)
-    // ----------------------------------------------------
-    const SUPABASE_URL = 'https://sugqnerwwrsjkjtjokli.supabase.co/rest/v1/';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1Z3FuZXJ3d3JzamtqdGpva2xpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEyOTQ1NTMsImV4cCI6MjEwNjg3MDU1M30.f3TmdXatD-u5CoOYzBkzaVW9mUYiBrtXWlpm4D4h1SQ';
-    const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    let currentCategory = 'demonlist'; 
-    let currentTier = 4;
-    let isAdminMode = false;
-
-    let players = [];
-    let levels = [];
-    let completions = [];
-
-    const categoryConfig = {
-      demonlist: { prefix: 'Classic', btnBg: 'bg-red-600', textAccent: 'text-red-400', borderAccent: 'border-red-500/30' },
-      pemonlist: { prefix: 'Platformer', btnBg: 'bg-emerald-600', textAccent: 'text-emerald-400', borderAccent: 'border-emerald-500/30' },
-      specials:  { prefix: 'Specials', btnBg: 'bg-amber-500 text-slate-950 font-bold', textAccent: 'text-amber-400', borderAccent: 'border-amber-500/30' },
-      packs:     { prefix: 'Packs', btnBg: 'bg-sky-600', textAccent: 'text-sky-400', borderAccent: 'border-sky-500/30' }
-    };
-
-    // ----------------------------------------------------
-    // FETCH DATA FROM SUPABASE
-    // ----------------------------------------------------
-    async function loadAllData() {
-      const [resPlayers, resLevels, resCompletions] = await Promise.all([
-        db.from('players').select('*'),
-        db.from('levels').select('*'),
-        db.from('completions').select('*')
-      ]);
-
-      if (resPlayers.error) console.error('Error fetching players:', resPlayers.error);
-      if (resLevels.error) console.error('Error fetching levels:', resLevels.error);
-      if (resCompletions.error) console.error('Error fetching completions:', resCompletions.error);
-
-      players = resPlayers.data || [];
-      levels = resLevels.data || [];
-      completions = resCompletions.data || [];
-
-      renderLevels();
-      renderLeaderboard();
-    }
-
-    // ----------------------------------------------------
-    // ADMIN FUNCTIONS: ADD LEVEL & ADD PLAYER
-    // ----------------------------------------------------
-    async function handleAddLevel(e) {
-      e.preventDefault();
-      const name = document.getElementById('admin-level-name').value.trim();
-      const creator = document.getElementById('admin-level-creator').value.trim();
-      const category = document.getElementById('admin-level-category').value;
-      const tier = parseInt(document.getElementById('admin-level-tier').value);
-      const placement = parseInt(document.getElementById('admin-level-placement').value);
-
-      if (!name || !creator) return;
-
-      const { data, error } = await db
-        .from('levels')
-        .insert([{ name, creator, category, tier, placement }])
-        .select();
-
-      if (error) {
-        alert('Error adding level: ' + error.message);
-      } else {
-        levels.push(data[0]);
-        // Reset form input
-        document.getElementById('admin-level-name').value = '';
-        document.getElementById('admin-level-creator').value = '';
-        renderLevels();
-      }
-    }
-
-    async function handleAddPlayer(e) {
-      e.preventDefault();
-      const username = document.getElementById('admin-player-username').value.trim();
-      if (!username) return;
-
-      const { data, error } = await db
-        .from('players')
-        .insert([{ username }])
-        .select();
-
-      if (error) {
-        alert('Error adding player: ' + error.message);
-      } else {
-        players.push(data[0]);
-        document.getElementById('admin-player-username').value = '';
-        renderLevels();
-        renderLeaderboard();
-      }
-    }
-
-    // ----------------------------------------------------
-    // SAVE ADMIN COMPLETIONS TO SUPABASE
-    // ----------------------------------------------------
-    async function togglePlayerCompletion(playerId, levelId) {
-      const existingIndex = completions.findIndex(c => c.player_id === playerId && c.level_id === levelId);
-
-      if (existingIndex > -1) {
-        const { error } = await db
-          .from('completions')
-          .delete()
-          .eq('player_id', playerId)
-          .eq('level_id', levelId);
-
-        if (!error) completions.splice(existingIndex, 1);
-      } else {
-        const { data, error } = await db
-          .from('completions')
-          .insert([{ player_id: playerId, level_id: levelId }])
-          .select();
-
-        if (!error && data.length > 0) completions.push(data[0]);
-      }
-
-      renderLevels();
-      renderLeaderboard();
-    }
-
-    function getPoints(level) {
-      const tierRanges = {
-        4: { max: 1000, min: 800 },
-        3: { max: 800, min: 500 },
-        2: { max: 500, min: 250 },
-        1: { max: 250, min: 100 }
-      };
-
-      const range = tierRanges[level.tier] || { max: 100, min: 0 };
-      const totalLevelsInTier = levels.filter(l => l.category === level.category && l.tier === level.tier).length;
-
-      if (totalLevelsInTier <= 1) return range.max.toFixed(1);
-
-      const step = (range.max - range.min) / (totalLevelsInTier - 1);
-      const calculatedPoints = range.max - ((level.placement - 1) * step);
-
-      return calculatedPoints.toFixed(1);
-    }
-
-    function toggleAdminPanel() {
-      isAdminMode = !isAdminMode;
-      document.getElementById('admin-bar').classList.toggle('hidden', !isAdminMode);
-      renderLevels();
-    }
-
-    function renderLevels() {
-      const container = document.getElementById('levels-container');
-      container.innerHTML = '';
-      
-      const config = categoryConfig[currentCategory] || categoryConfig.demonlist;
-
-      const filteredLevels = levels
-        .filter(l => l.category === currentCategory && l.tier === currentTier)
-        .sort((a, b) => a.placement - b.placement);
-
-      document.getElementById('current-tier-title').textContent = `${config.prefix} Tier ${currentTier}`;
-      document.getElementById('level-count').textContent = `${filteredLevels.length} Level${filteredLevels.length === 1 ? '' : 's'} Listed`;
-
-      [1, 2, 3, 4].forEach(t => {
-        const btn = document.getElementById(`tier-btn-${t}`);
-        if (t === currentTier) {
-          btn.className = `px-3.5 py-1.5 ${config.btnBg} rounded text-xs font-semibold text-white shadow-sm`;
-        } else {
-          btn.className = "px-3.5 py-1.5 bg-slate-800 text-slate-300 rounded text-xs font-semibold hover:bg-slate-700 transition";
-        }
-      });
-
-      if (filteredLevels.length === 0) {
-        container.innerHTML = `
-          <div class="bg-slate-950 border border-slate-800 rounded-lg p-10 text-center space-y-2">
-            <p class="text-sm font-semibold text-slate-400">No Levels Available</p>
-            <p class="text-xs text-slate-600">There are currently no levels in ${config.prefix} Tier ${currentTier}. Use Admin Mode to add levels.</p>
-          </div>
-        `;
-        return;
-      }
-
-      filteredLevels.forEach(level => {
-        const points = getPoints(level);
-        const conquerors = completions
-          .filter(c => c.level_id === level.id)
-          .map(c => players.find(p => p.id === c.player_id)?.username)
-          .filter(Boolean);
-
-        const card = document.createElement('div');
-        card.className = "bg-slate-950 border border-slate-800 rounded-lg p-4 flex flex-col gap-3 hover:border-slate-700 transition shadow-sm";
-        
-        let adminHtml = '';
-        if (isAdminMode) {
-          adminHtml = `
-            <div class="border-t border-slate-800/80 pt-2.5 flex items-center gap-3 text-xs text-slate-400 overflow-x-auto">
-              <span class="font-bold ${config.textAccent} whitespace-nowrap">Victor Check:</span>
-              ${players.length === 0 ? '<span class="italic text-slate-600">No players created yet.</span>' : players.map(p => {
-                const isBeaten = completions.some(c => c.player_id === p.id && c.level_id === level.id);
-                return `
-                  <label class="flex items-center gap-1.5 cursor-pointer hover:text-slate-200 whitespace-nowrap">
-                    <input type="checkbox" ${isBeaten ? 'checked' : ''} onchange="togglePlayerCompletion(${p.id},${level.id})" class="accent-red-500 rounded">
-                    ${p.username}
-                  </label>
+            demons.forEach((demon, index) => {
+                const rank = index + 1;
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td>#${rank}</td>
+                    <td>${demon.name}</td>
+                    <td>${demon.publisher}</td>
+                    <td>${demon.points}</td>
                 `;
-              }).join('')}
-            </div>
-          `;
+            });
         }
 
-        card.innerHTML = `
-          <div class="flex justify-between items-center gap-4">
-            <div class="flex items-center gap-3.5">
-              <span class="text-lg font-bold ${config.textAccent} font-mono w-8 text-center">#${level.placement}</span>
-              <div>
-                <div class="flex items-center gap-2">
-                  <h3 class="font-bold text-slate-100 text-base">${level.name}</h3>
-                  <span class="text-[10px] bg-slate-800 border border-slate-700/50 text-slate-300 px-2 py-0.5 rounded font-mono">Tier ${level.tier}</span>
-                </div>
-                <p class="text-xs text-slate-400">by <span class="text-slate-300 font-medium">${level.creator}</span></p>
-              </div>
-            </div>
-            <div class="text-right whitespace-nowrap">
-              <span class="text-sm font-bold text-slate-200 font-mono block">${points} <span class="text-xs text-slate-500 font-normal">pts</span></span>
-              <span class="text-xs text-slate-500">${conquerors.length} Victor${conquerors.length === 1 ? '' : 's'}</span>
-            </div>
-          </div>
-          ${adminHtml}
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function selectTier(tierNumber) {
-      currentTier = tierNumber;
-      renderLevels();
-    }
-
-    function renderLeaderboard() {
-      const container = document.getElementById('leaderboard-container');
-      container.innerHTML = '';
-
-      const leaderboardData = players.map(player => {
-        const playerCompletions = completions.filter(c => c.player_id === player.id);
-        const playerLevels = playerCompletions
-          .map(c => levels.find(l => l.id === c.level_id))
-          .filter(Boolean)
-          .sort((a, b) => {
-            if (b.tier !== a.tier) return b.tier - a.tier;
-            return a.placement - b.placement;
-          });
-
-        const totalPoints = playerLevels.reduce((sum, l) => sum + parseFloat(getPoints(l)), 0);
-
-        return {
-          ...player,
-          totalPoints: +totalPoints.toFixed(1),
-          demonsBeaten: playerLevels.length
-        };
-      }).sort((a, b) => b.totalPoints - a.totalPoints);
-
-      const topPlayer = leaderboardData[0];
-      document.getElementById('top-player-name').textContent = topPlayer ? `${topPlayer.username} (${topPlayer.totalPoints} pts)` : 'None';
-
-      if (leaderboardData.length === 0) {
-        container.innerHTML = `
-          <div class="bg-slate-950 border border-slate-800 rounded-lg p-8 text-center">
-            <p class="text-xs text-slate-500 italic">No players added yet. Add players in Admin Mode.</p>
-          </div>
-        `;
-        return;
-      }
-
-      leaderboardData.forEach((player, index) => {
-        const rank = index + 1;
-        const card = document.createElement('div');
-        
-        let rankColor = 'text-slate-400 bg-slate-900 border-slate-800';
-        if (rank === 1) rankColor = 'text-amber-400 bg-amber-950/30 border-amber-500/30';
-        else if (rank === 2) rankColor = 'text-slate-300 bg-slate-800/50 border-slate-700/50';
-        else if (rank === 3) rankColor = 'text-amber-600 bg-amber-950/20 border-amber-700/20';
-
-        card.className = "bg-slate-950 border border-slate-800 rounded-lg p-3.5 sm:grid sm:grid-cols-12 flex justify-between items-center shadow-sm gap-2";
-        
-        card.innerHTML = `
-          <div class="sm:col-span-1 flex items-center">
-            <span class="font-mono font-bold text-xs px-2 py-1 rounded border ${rankColor} w-8 text-center">#${rank}</span>
-          </div>
-          <div class="sm:col-span-6 flex items-center gap-2.5">
-            <h4 class="font-bold text-slate-100 text-sm">${player.username}</h4>
-          </div>
-          <div class="hidden sm:flex sm:col-span-3 items-center justify-center">
-            <span class="text-xs font-semibold text-slate-300 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded">${player.demonsBeaten} Demons</span>
-          </div>
-          <div class="sm:col-span-2 text-right">
-            <span class="font-mono font-bold text-indigo-400 text-base">${player.totalPoints}</span>
-            <span class="text-[10px] text-slate-500 block -mt-1 font-mono">PTS</span>
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function switchMainTab(tab) {
-      const views = ['home', 'changelog', 'list-container', 'leaderboard'];
-      const navButtons = ['changelog', 'demonlist', 'pemonlist', 'specials', 'packs', 'leaderboard'];
-      
-      views.forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
-      navButtons.forEach(b => {
-        const btn = document.getElementById(`btn-${b}`);
-        if (btn) btn.className = "px-3 py-1.5 bg-slate-800 text-slate-300 rounded font-medium text-xs hover:bg-slate-700 transition";
-      });
-
-      const subtitle = document.getElementById('header-subtitle');
-
-      if (tab === 'home') {
-        document.getElementById('view-home').classList.remove('hidden');
-        subtitle.textContent = "Home";
-        subtitle.className = "text-slate-400 font-normal text-sm transition-colors";
-      } else if (tab === 'changelog') {
-        document.getElementById('view-changelog').classList.remove('hidden');
-        document.getElementById('btn-changelog').className = "px-3 py-1.5 bg-slate-200 text-slate-900 rounded font-medium text-xs transition";
-        subtitle.textContent = "Changelog";
-      } else if (tab === 'leaderboard') {
-        document.getElementById('view-leaderboard').classList.remove('hidden');
-        document.getElementById('btn-leaderboard').className = "px-3 py-1.5 bg-indigo-600 text-white rounded font-medium text-xs transition";
-        subtitle.textContent = "Leaderboard";
-        renderLeaderboard();
-      } else {
-        currentCategory = tab;
-        document.getElementById('view-list-container').classList.remove('hidden');
-        
-        const activeBtn = document.getElementById(`btn-${tab}`);
-        const config = categoryConfig[tab];
-        if (activeBtn && config) {
-          activeBtn.className = `px-3 py-1.5 ${config.btnBg} text-white rounded font-medium text-xs transition`;
-          subtitle.textContent = config.prefix;
-        }
-        renderLevels();
-      }
-    }
-
-    // Initialize application
-    switchMainTab('home');
-    loadAllData();
-  </script>
+        fetchDemons();
+    </script>
 </body>
 </html>
